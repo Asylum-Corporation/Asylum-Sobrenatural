@@ -1,0 +1,32 @@
+workflows:
+  android-debug:
+    name: Asylum Player APK
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+
+    environment:
+      java: 17
+
+    scripts:
+      - name: Extrair projeto Android
+        script: |
+          unzip -q Asylum_Player_Android_Source.zip
+
+      - name: Configurar Android SDK
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > android-project/local.properties
+
+      - name: Instalar Gradle 8.9
+        script: |
+          curl -L --fail --retry 3 \
+            https://services.gradle.org/distributions/gradle-8.9-bin.zip \
+            -o /tmp/gradle-8.9-bin.zip
+          unzip -q /tmp/gradle-8.9-bin.zip -d /tmp
+
+      - name: Gerar APK de teste
+        script: |
+          cd android-project
+          /tmp/gradle-8.9/bin/gradle assembleDebug --stacktrace
+
+    artifacts:
+      - android-project/app/build/outputs/apk/debug/app-debug.apk
